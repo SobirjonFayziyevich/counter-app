@@ -1,1 +1,2 @@
-export const contractAddress = '0xc1B42c73d488818Da78FDdC411C0a264146278E'
+export const contractAddress = '0xd9145CCE52D386f254917e481eB44e9943F39138'
+export const chainId = 11155111

@@ -1,88 +1,77 @@
 import { ethers } from 'ethers'
-import { contractAddress } from './constants'
-import CounterABI from './Counter.json'
+import { contractAddress, SEPOLIA_RPC_URL } from '@/src/lib/constants'
+import abi from './abi.json'
 
-// 컨트랙트 메서드들을 타입 안전하게 정의
-interface CounterContractMethods {
-  getCounter(): Promise<bigint>
-  incrementCounter(): Promise<ethers.ContractTransactionResponse>
-  decrementCounter(): Promise<ethers.ContractTransactionResponse>
-  resetCounter(): Promise<ethers.ContractTransactionResponse>
-  owner(): Promise<string>
+/**
+ * Sepolia 테스트넷 Provider 생성
+ */
+export function getProvider(): ethers.JsonRpcProvider | ethers.BrowserProvider {
+  // MetaMask나 다른 지갑이 있으면 window.ethereum 사용
+  if (typeof window !== 'undefined' && window.ethereum) {
+    return new ethers.BrowserProvider(window.ethereum)
+  }
+  // 기본 Sepolia RPC 사용 (공개 RPC는 제한이 있을 수 있음)
+  return new ethers.JsonRpcProvider(SEPOLIA_RPC_URL)
 }
 
-export class CounterContractService {
-  private contract: (ethers.Contract & CounterContractMethods) | null = null
-  private provider: ethers.BrowserProvider | null = null
-  private signer: ethers.JsonRpcSigner | null = null
+/**
+ * 컨트랙트 인스턴스 생성 (읽기 전용)
+ */
+export function getContract(): ethers.Contract {
+  const provider = getProvider()
+  return new ethers.Contract(contractAddress, abi, provider)
+}
 
-  async connect(): Promise<void> {
-    if (typeof window === 'undefined') {
-      throw new Error('이 함수는 브라우저에서만 실행할 수 있습니다.')
-    }
-
-    if (!window.ethereum) {
-      throw new Error('MetaMask가 설치되지 않았습니다.')
-    }
-
-    this.provider = new ethers.BrowserProvider(window.ethereum)
-    this.signer = await this.provider.getSigner()
-    this.contract = new ethers.Contract(
-      contractAddress,
-      CounterABI,
-      this.signer
-    ) as ethers.Contract & CounterContractMethods
+/**
+ * 서명된 컨트랙트 인스턴스 생성 (쓰기 작업용)
+ */
+export async function getSignedContract(): Promise<ethers.Contract | null> {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    return null
   }
 
-  async getCounter(): Promise<bigint> {
-    if (!this.contract) {
-      throw new Error('컨트랙트에 연결되지 않았습니다.')
-    }
-    return await this.contract.getCounter()
+  const provider = new ethers.BrowserProvider(window.ethereum)
+  const signer = await provider.getSigner()
+  return new ethers.Contract(contractAddress, abi, signer)
+}
+
+/**
+ * 현재 연결된 계정 주소 가져오기
+ */
+export async function getCurrentAccount(): Promise<string | null> {
+  if (typeof window === 'undefined' || !window.ethereum) {
+    return null
   }
 
-  async incrementCounter(): Promise<void> {
-    if (!this.contract) {
-      throw new Error('컨트랙트에 연결되지 않았습니다.')
-    }
-    const tx = await this.contract.incrementCounter()
-    await tx.wait()
-  }
-
-  async decrementCounter(): Promise<void> {
-    if (!this.contract) {
-      throw new Error('컨트랙트에 연결되지 않았습니다.')
-    }
-    const tx = await this.contract.decrementCounter()
-    await tx.wait()
-  }
-
-  async resetCounter(): Promise<void> {
-    if (!this.contract) {
-      throw new Error('컨트랙트에 연결되지 않았습니다.')
-    }
-    const tx = await this.contract.resetCounter()
-    await tx.wait()
-  }
-
-  async getOwner(): Promise<string> {
-    if (!this.contract) {
-      throw new Error('컨트랙트에 연결되지 않았습니다.')
-    }
-    return await this.contract.owner()
-  }
-
-  async getWalletAddress(): Promise<string> {
-    if (!this.signer) {
-      throw new Error('지갑에 연결되지 않았습니다.')
-    }
-    return await this.signer.getAddress()
-  }
-
-  isConnected(): boolean {
-    return this.contract !== null
+  try {
+    const provider = new ethers.BrowserProvider(window.ethereum)
+    const accounts = await provider.listAccounts()
+    return accounts.length > 0 ? accounts[0].address : null
+  } catch (error) {
+    console.error('Failed to get account:', error)
+    return null
   }
 }
 
-// 전역 인스턴스
-export const counterService = new CounterContractService()
+// Window 타입 확장
+declare global {
+  interface Window {
+    ethereum?: EthereumProvider
+  }
+}
+
+interface EthereumProvider {
+  isMetaMask?: boolean
+
+  request: (args: {
+    method: string
+    params?: unknown[] | object
+  }) => Promise<any>
+
+  on: (event: string, callback: (...args: any[]) => void) => void
+
+  removeListener: (
+    event: string,
+    callback: (...args: any[]) => void
+  ) => void
+}

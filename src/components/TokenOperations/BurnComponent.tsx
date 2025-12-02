@@ -93,4 +93,6 @@ export default function BurnComponent({
       >
         {loading ? '처리 중...' : '소각'}
       </button>
-    </div
+    </div>
+  )
+}

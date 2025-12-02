@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from 'react'
 import { ethers } from 'ethers'
-import { getContract, getCurrentAccount } from '../lib/contract'
-import { SEPOLIA_CHAIN_ID } from '../lib/constants'
-import { TokenInfo } from '../types/token'
-import Header from '../components/Header'
-import WalletConnection from '../components/WalletConnection'
-import ErrorMessage from '../components/ErrorMessage'
-import Loading from '../components/Loading'
-import TokenInfoCard from '../components/TokenInfoCard'
-import BalanceCard from '../components/BalanceCard'
-import TokenOperations from '../components/TokenOperations'
+import { getContract, getCurrentAccount } from '@/src/lib/contract'
+import { SEPOLIA_CHAIN_ID } from '@/src/lib/constants'
+import { TokenInfo } from '@/src/types/token'
+import Header from '@/src/components/Header'
+import WalletConnection from '@/src/components/WalletConnection'
+import ErrorMessage from '@/src/components/ErrorMessage'
+import Loading from '@/src/components/Loading'
+import TokenInfoCard from '@/src/components/TokenInfoCard'
+import BalanceCard from '@/src/components/BalanceCard'
+import TokenOperations from '@/src/components/TokenOperations'
 
 export default function TokenApp() {
   const [account, setAccount] = useState<string | null>(null)
@@ -154,38 +154,75 @@ export default function TokenApp() {
   }
 
   // 토큰 정보 로드
+  // const loadTokenInfo = async (address: string) => {
+  //   setLoading(true)
+  //   setError(null)
+
+  //   try {
+  //     const contract = getContract()
+  //     const [name, symbol, decimals, totalSupply, balance] = await Promise.all([
+  //       contract.name(),
+  //       contract.symbol(),
+  //       contract.decimals(),
+  //       contract.totalSupply(),
+  //       contract.balanceOf(address),
+  //     ])
+
+  //     const decimalsNum = Number(decimals)
+  //     const formattedTotalSupply = ethers.formatUnits(totalSupply, decimalsNum)
+  //     const formattedBalance = ethers.formatUnits(balance, decimalsNum)
+
+  //     setTokenInfo({
+  //       name,
+  //       symbol,
+  //       decimals: decimalsNum,
+  //       totalSupply: formattedTotalSupply,
+  //       balance: formattedBalance,
+  //     })
+  //   } catch (err: any) {
+  //     console.error('Failed to load token info:', err)
+  //     setError('토큰 정보를 불러오는데 실패했습니다: ' + err.message)
+  //   } finally {
+  //     setLoading(false)
+  //   }
+  // }
   const loadTokenInfo = async (address: string) => {
-    setLoading(true)
-    setError(null)
+  setLoading(true)
+  setError(null)
 
-    try {
-      const contract = getContract()
-      const [name, symbol, decimals, totalSupply, balance] = await Promise.all([
-        contract.name(),
-        contract.symbol(),
-        contract.decimals(),
-        contract.totalSupply(),
-        contract.balanceOf(address),
-      ])
+  try {
+    const contract = getContract()
 
-      const decimalsNum = Number(decimals)
-      const formattedTotalSupply = ethers.formatUnits(totalSupply, decimalsNum)
-      const formattedBalance = ethers.formatUnits(balance, decimalsNum)
+    let name = "Unknown"
+    let symbol = "UNK"
+    let decimals = 18
+    let totalSupply = 0
+    let balance = 0
 
-      setTokenInfo({
-        name,
-        symbol,
-        decimals: decimalsNum,
-        totalSupply: formattedTotalSupply,
-        balance: formattedBalance,
-      })
-    } catch (err: any) {
-      console.error('Failed to load token info:', err)
-      setError('토큰 정보를 불러오는데 실패했습니다: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+    try { name = await contract.name() } catch {}
+    try { symbol = await contract.symbol() } catch {}
+    try { decimals = await contract.decimals() } catch {}
+    try { totalSupply = await contract.totalSupply() } catch {}
+    try { balance = await contract.balanceOf(address) } catch {}
+
+    const decimalsNum = Number(decimals)
+    const formattedTotalSupply = ethers.formatUnits(totalSupply, decimalsNum)
+    const formattedBalance = ethers.formatUnits(balance, decimalsNum)
+
+    setTokenInfo({
+      name,
+      symbol,
+      decimals: decimalsNum,
+      totalSupply: formattedTotalSupply,
+      balance: formattedBalance,
+    })
+  } catch (err: any) {
+    console.error('Failed to load token info:', err)
+    setError('토큰 정보를 불러오는데 실패했습니다: ' + err.message)
+  } finally {
+    setLoading(false)
   }
+}
 
   // 잔액 새로고침
   const refreshBalance = async () => {

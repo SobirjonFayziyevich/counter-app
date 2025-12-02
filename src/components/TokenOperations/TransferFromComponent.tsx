@@ -108,4 +108,6 @@ export default function TransferFromComponent({
       >
         {loading ? '처리 중...' : '대리 전송'}
       </button>
-    </div
+    </div>
+  )
+}

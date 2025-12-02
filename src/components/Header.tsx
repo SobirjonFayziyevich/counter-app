@@ -31,7 +31,7 @@ export default function Header({ ownerAddress }: HeaderProps) {
                 className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                 title="주소 복사"
               >
-                📋 복사
+
               </button>
             </div>
           </div>
@@ -49,7 +49,6 @@ export default function Header({ ownerAddress }: HeaderProps) {
                   className="text-blue-600 hover:text-blue-800 text-xs font-medium"
                   title="주소 복사"
                 >
-                  📋 복사
                 </button>
               </div>
             </div>

@@ -129,4 +129,6 @@ export default function ApproveComponent({
       >
         {loading ? '처리 중...' : '허용 설정'}
       </button>
-    </div
+    </div>
+  )
+}

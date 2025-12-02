@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { TokenInfo } from '@/types/token'
+import { TokenInfo } from '@/src/types/token'
 import TransferComponent from './TransferComponent'
 import ApproveComponent from './ApproveComponent'
 import TransferFromComponent from './TransferFromComponent'

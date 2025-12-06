@@ -9,7 +9,7 @@ import Header from '@/src/components/Header'
 import WalletConnection from '@/src/components/WalletConnection'
 import ErrorMessage from '@/src/components/ErrorMessage'
 import Loading from '@/src/components/Loading'
-import TokenInfoCard from '@/src/components/TokenInfoCard'
+import TokenInfoCard from '@/src/components/TokenOperations'
 import BalanceCard from '@/src/components/BalanceCard'
 import TokenOperations from '@/src/components/TokenOperations'
 

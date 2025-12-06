@@ -1,4 +1,4 @@
-import { TokenInfo } from '@/src/types/token'
+import { TokenInfo } from '../types/token'
 
 interface TokenInfoCardProps {
   tokenInfo: TokenInfo
